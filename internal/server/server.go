@@ -43,10 +43,11 @@ func New(cfg *config.Config, db *database.Queries) *Server {
 func (s *Server) setupRoutes() {
 	v1Router := chi.NewRouter()
 
-	// apiConfig := &apiConfig{DB: s.db}
+	apiConfig := &handlers.APIConfig{DB: s.db}
 
 	v1Router.Get("/healthz", handlers.HandlerReadiness)
 	v1Router.Get("/err", handlers.HandlerErr)
+	v1Router.Post("/webpages", apiConfig.CreateWebpage)
 	// v1Router.Post("/users", apiConfig.handlerCreateUser)
 	// v1Router.Get("/users", apiConfig.middlewareAuth(apiConfig.handlerGetUserByAPIKey))
 	// v1Router.Post("/feeds", apiConfig.middlewareAuth(apiConfig.handlerCreateFeed))
@@ -64,8 +65,4 @@ func (s *Server) Start() error {
 
 	log.Printf("Server listening on port %v", s.config.Port)
 	return srv.ListenAndServe()
-}
-
-type apiConfig struct {
-	DB *database.Queries
 }
