@@ -1,5 +1,7 @@
 [x] Setup database connection
-[] Add database queries for posts
-[] Add endpoint for posts
-[] Add database migrations
+[x] Add database queries for posts
+[x] Add endpoint for posts
+[x] Add database migrations
+[x] Add database schema
+[x] add scrapper logic
 [] Figure out how to host server

@@ -66,6 +66,11 @@ func scrapeFeed(db *database.Queries, wg *sync.WaitGroup, page database.Webpage)
 		if item.PubDate != "" {
 			publishedAt = sql.NullTime{Time: t, Valid: true}
 		}
+
+		if item.Link == "" {
+			log.Printf("Undefined link for item %v", item.Title)
+			continue
+		}
 		post, err := db.CreatePost(context.Background(), database.CreatePostParams{
 			ID:          uuid.New(),
 			CreatedAt:   time.Now().UTC(),
