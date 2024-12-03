@@ -48,11 +48,7 @@ func (s *Server) setupRoutes() {
 	v1Router.Get("/healthz", handlers.HandlerReadiness)
 	v1Router.Get("/err", handlers.HandlerErr)
 	v1Router.Post("/webpages", apiConfig.CreateWebpage)
-	// v1Router.Post("/users", apiConfig.handlerCreateUser)
-	// v1Router.Get("/users", apiConfig.middlewareAuth(apiConfig.handlerGetUserByAPIKey))
-	// v1Router.Post("/feeds", apiConfig.middlewareAuth(apiConfig.handlerCreateFeed))
-	// v1Router.Get("/feeds", apiConfig.getFeeds)
-	// v1Router.Post("/follow", apiConfig.middlewareAuth(apiConfig.handlerFeedFollow))
+	v1Router.Get("/posts", apiConfig.GetPost)
 
 	s.router.Mount("/v1", v1Router)
 }

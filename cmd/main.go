@@ -3,10 +3,12 @@ package main
 import (
 	"database/sql"
 	"log"
+	"time"
 
 	"github.com/cyberkillua/dailyread/internal/config"
 	"github.com/cyberkillua/dailyread/internal/database"
 	"github.com/cyberkillua/dailyread/internal/server"
+	"github.com/cyberkillua/dailyread/internal/utils"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
@@ -31,6 +33,8 @@ func main() {
 
 	// Initialize database queries
 	db := database.New(connection)
+
+	go utils.StartScrapping(db, 10, time.Hour)
 
 	// Create and start server
 	srv := server.New(cfg, db)

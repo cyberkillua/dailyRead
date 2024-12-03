@@ -12,13 +12,13 @@ import (
 	"github.com/google/uuid"
 )
 
-const createWebpage = `-- name: createWebpage :one
+const createWebpage = `-- name: CreateWebpage :one
 INSERT INTO webpages (id, created_at, updated_at, name, url, type)
 VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING id, created_at, updated_at, name, url, type
+RETURNING id, created_at, updated_at, name, url, type, last_updated_at
 `
 
-type createWebpageParams struct {
+type CreateWebpageParams struct {
 	ID        uuid.UUID
 	CreatedAt time.Time
 	UpdatedAt time.Time
@@ -27,7 +27,7 @@ type createWebpageParams struct {
 	Type      string
 }
 
-func (q *Queries) createWebpage(ctx context.Context, arg createWebpageParams) (Webpage, error) {
+func (q *Queries) CreateWebpage(ctx context.Context, arg CreateWebpageParams) (Webpage, error) {
 	row := q.db.QueryRowContext(ctx, createWebpage,
 		arg.ID,
 		arg.CreatedAt,
@@ -44,6 +44,67 @@ func (q *Queries) createWebpage(ctx context.Context, arg createWebpageParams) (W
 		&i.Name,
 		&i.Url,
 		&i.Type,
+		&i.LastUpdatedAt,
+	)
+	return i, err
+}
+
+const getNextWebpageToFetch = `-- name: GetNextWebpageToFetch :many
+SELECT id, created_at, updated_at, name, url, type, last_updated_at FROM webpages
+ORDER BY last_updated_at ASC NULLS FIRST   
+LIMIT $1
+`
+
+func (q *Queries) GetNextWebpageToFetch(ctx context.Context, limit int32) ([]Webpage, error) {
+	rows, err := q.db.QueryContext(ctx, getNextWebpageToFetch, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Webpage
+	for rows.Next() {
+		var i Webpage
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Name,
+			&i.Url,
+			&i.Type,
+			&i.LastUpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const markWebpageAsFetched = `-- name: MarkWebpageAsFetched :one
+UPDATE webpages
+SET last_updated_at = Now(), 
+updated_at = Now()
+WHERE id = $1
+RETURNING id, created_at, updated_at, name, url, type, last_updated_at
+`
+
+func (q *Queries) MarkWebpageAsFetched(ctx context.Context, id uuid.UUID) (Webpage, error) {
+	row := q.db.QueryRowContext(ctx, markWebpageAsFetched, id)
+	var i Webpage
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Name,
+		&i.Url,
+		&i.Type,
+		&i.LastUpdatedAt,
 	)
 	return i, err
 }

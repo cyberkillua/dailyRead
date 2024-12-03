@@ -22,10 +22,11 @@ type Post struct {
 }
 
 type Webpage struct {
-	ID        uuid.UUID
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Name      string
-	Url       string
-	Type      string
+	ID            uuid.UUID
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	Name          string
+	Url           string
+	Type          string
+	LastUpdatedAt sql.NullTime
 }
