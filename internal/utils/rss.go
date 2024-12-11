@@ -10,16 +10,16 @@ import (
 type RSS struct {
 	Title       string    `xml:"channel>title"`
 	Link        string    `xml:"channel>link"`
-	Description string    `xml:"description"`
-	Language    string    `xml:"channel>language"`
+	Description string    `xml:"description,omitempty"`
+	Language    string    `xml:"channel>language,omitempty"`
 	Items       []RSSItem `xml:"channel>item"`
 }
 
 type RSSItem struct {
 	Title       string `xml:"title"`
 	Link        string `xml:"link"`
-	Description string `xml:"description"`
-	PubDate     string `xml:"pubDate"`
+	Description string `xml:"description,omitempty"`
+	PubDate     string `xml:"pubDate,omitempty"`
 }
 
 func urlToRSS(url string) (RSS, error) {
