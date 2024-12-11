@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"strings"
 	"sync"
@@ -23,7 +24,6 @@ func StartScrapping(db *database.Queries, concurrency int, durationBetween time.
 			log.Printf("Error getting feeds to scrap: %v", err)
 			continue
 		}
-
 		wg := &sync.WaitGroup{}
 
 		for _, page := range pages {
@@ -51,19 +51,27 @@ func scrapeFeed(db *database.Queries, wg *sync.WaitGroup, page database.Webpage)
 	}
 
 	log.Printf("Scrapped feed %v", page.Url)
+	log.Printf("Found %v channels", len(rss.Channel.Items))
 
-	for _, item := range rss.Items {
+	// log.Printf("All Rss Items: %v", rss)
+
+	for _, item := range rss.Channel.Items {
+
 		description := sql.NullString{}
 		if item.Description != "" {
 			description = sql.NullString{String: item.Description, Valid: true}
 		}
-		t, err := time.Parse(time.RFC1123, item.PubDate)
-		if err != nil {
-			log.Printf("Error parsing pubDate: %v", err)
-			continue
-		}
+
 		publishedAt := sql.NullTime{}
 		if item.PubDate != "" {
+			t, err := parseDate(item.PubDate)
+			if err != nil {
+				log.Printf("Error parsing pubDate: %v", err)
+				log.Printf("Undefined pubDate for item %v", item.PubDate)
+				continue
+			}
+
+			// Successfully parsed pubDate
 			publishedAt = sql.NullTime{Time: t, Valid: true}
 		}
 
@@ -92,4 +100,28 @@ func scrapeFeed(db *database.Queries, wg *sync.WaitGroup, page database.Webpage)
 		log.Printf("Created post %v", post.Url)
 	}
 
+}
+
+func parseDate(pubDate string) (time.Time, error) {
+	// Define the possible date formats
+	formats := []string{
+		time.RFC1123,  // Example: "Mon, 02 Jan 2006 15:04:05 MST"
+		time.RFC1123Z, // Example: "Mon, 02 Jan 2006 15:04:05 -0700"
+		time.RFC3339,  // Example: "2006-01-02T15:04:05Z07:00"
+		time.RFC822,   // Example: "02 Jan 06 15:04 MST"
+		time.RFC822Z,  // Example: "02 Jan 06 15:04 -0700"
+		time.RFC850,   // Example: "Monday, 02-Jan-06 15:04:05 MST"
+		time.RubyDate, // Example: "Mon Jan 02 15:04:05 -0700 2006"
+	}
+
+	// Iterate through the formats and try parsing
+	for _, format := range formats {
+		t, err := time.Parse(format, pubDate)
+		if err == nil {
+			return t, nil // Successfully parsed
+		}
+	}
+
+	// If all formats fail, return an error
+	return time.Time{}, fmt.Errorf("unknown date format: %s", pubDate)
 }
