@@ -65,7 +65,7 @@ func scrapeFeed(db *database.Queries, wg *sync.WaitGroup, page database.Webpage)
 
 		pageName := sql.NullString{}
 		if page.Name != "" {
-			pageName = sql.NullString{String: item.Title, Valid: true}
+			pageName = sql.NullString{String: page.Name, Valid: true}
 		}
 
 		publishedAt := sql.NullTime{}
