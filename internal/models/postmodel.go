@@ -15,6 +15,7 @@ type Post struct {
 	Description string    `json:"description"`
 	Url         string    `json:"url"`
 	PublishedAt time.Time `json:"published_at"`
+	Postname    string    `json:"postname"`
 }
 
 func DatabasePostToPost(dbPost database.Post) Post {
@@ -26,6 +27,7 @@ func DatabasePostToPost(dbPost database.Post) Post {
 		Description: dbPost.Description.String,
 		Url:         dbPost.Url,
 		PublishedAt: dbPost.PublishedAt.Time,
+		Postname:    dbPost.Postname.String,
 	}
 }
 

@@ -14,9 +14,9 @@ import (
 )
 
 const createPost = `-- name: CreatePost :one
-INSERT INTO posts (id, created_at, updated_at, title, description, url, published_at)
-VALUES ($1, $2, $3, $4, $5, $6, $7)
-RETURNING id, created_at, updated_at, title, description, url, published_at
+INSERT INTO posts (id, created_at, updated_at, title, description, url, published_at, postName)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+RETURNING id, created_at, updated_at, title, description, url, published_at, postname
 `
 
 type CreatePostParams struct {
@@ -27,6 +27,7 @@ type CreatePostParams struct {
 	Description sql.NullString
 	Url         string
 	PublishedAt sql.NullTime
+	Postname    sql.NullString
 }
 
 func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, error) {
@@ -38,6 +39,7 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, e
 		arg.Description,
 		arg.Url,
 		arg.PublishedAt,
+		arg.Postname,
 	)
 	var i Post
 	err := row.Scan(
@@ -48,12 +50,13 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, e
 		&i.Description,
 		&i.Url,
 		&i.PublishedAt,
+		&i.Postname,
 	)
 	return i, err
 }
 
 const getPosts = `-- name: GetPosts :many
-SELECT id, created_at, updated_at, title, description, url, published_at FROM posts
+SELECT id, created_at, updated_at, title, description, url, published_at, postname FROM posts
 `
 
 func (q *Queries) GetPosts(ctx context.Context) ([]Post, error) {
@@ -73,6 +76,7 @@ func (q *Queries) GetPosts(ctx context.Context) ([]Post, error) {
 			&i.Description,
 			&i.Url,
 			&i.PublishedAt,
+			&i.Postname,
 		); err != nil {
 			return nil, err
 		}

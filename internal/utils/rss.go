@@ -12,14 +12,6 @@ import (
 	"time"
 )
 
-// type RSS struct {
-// 	Title       string    `xml:"channel>title"`
-// 	Link        string    `xml:"channel>link"`
-// 	Description string    `xml:"description,omitempty"`
-// 	Language    string    `xml:"channel>language,omitempty"`
-// 	Items       []RSSItem `xml:"channel>item"`
-// }
-
 type Atom struct {
 	XMLName xml.Name    `xml:"feed"`
 	Title   string      `xml:"title"`
@@ -33,7 +25,7 @@ type AtomEntry struct {
 		Type string `xml:"type,attr"`
 		Href string `xml:"href,attr"`
 	} `xml:"link"`
-	Description string `xml:"summary"` // Use "summary" for description
+	Description string `xml:"summary"`
 	PublishedAt string `xml:"published"`
 }
 
@@ -86,7 +78,7 @@ func urlToRSS(url string) (RSS, error) {
 			if len(via) >= 5 {
 				return fmt.Errorf("stopped after 5 redirects")
 			}
-			// Log redirect information
+
 			if len(via) > 0 {
 				log.Printf("Redirect from %s to %s", via[len(via)-1].URL, req.URL)
 			}
@@ -94,13 +86,11 @@ func urlToRSS(url string) (RSS, error) {
 		},
 	}
 
-	// Create a request with multiple headers to improve chances of getting the feed
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return RSS{}, fmt.Errorf("failed to create request: %w", err)
 	}
 
-	// Multiple user agents and accept headers to increase compatibility
 	userAgents := []string{
 		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
 		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
@@ -111,7 +101,6 @@ func urlToRSS(url string) (RSS, error) {
 	req.Header.Set("Accept", "application/rss+xml, application/atom+xml, application/xml, text/xml")
 	req.Header.Set("Accept-Language", "en-US,en;q=0.9")
 
-	// Perform the request
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		return RSS{}, fmt.Errorf("failed to fetch feed: %w", err)
@@ -123,7 +112,6 @@ func urlToRSS(url string) (RSS, error) {
 	log.Printf("Response Status: %s", resp.Status)
 	log.Printf("Content-Type: %s", resp.Header.Get("Content-Type"))
 
-	// Read all data
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return RSS{}, fmt.Errorf("failed to read response body: %w", err)
@@ -132,39 +120,8 @@ func urlToRSS(url string) (RSS, error) {
 	// Debug: log first 500 characters
 	// log.Printf("Response Body (first 500 chars): %s", string(data[:min(len(data), 500)]))
 
-	// Alternative feed URLs to try
-	alternativeFeedUrls := []string{
-		"https://www.farnamstreetblog.com/feed/rss/",
-		"https://fs.blog/feed/",
-		"https://fs.blog/feed/rss/",
-	}
-
-	// If not XML, try alternative URLs
-	contentType := resp.Header.Get("Content-Type")
-	if !strings.Contains(contentType, "xml") {
-		for _, altUrl := range alternativeFeedUrls {
-			log.Printf("Trying alternative URL: %s", altUrl)
-			altResp, err := httpClient.Get(altUrl)
-			if err != nil {
-				log.Printf("Failed to fetch alternative URL %s: %v", altUrl, err)
-				continue
-			}
-			defer altResp.Body.Close()
-
-			if strings.Contains(altResp.Header.Get("Content-Type"), "xml") {
-				data, err = io.ReadAll(altResp.Body)
-				if err != nil {
-					return RSS{}, fmt.Errorf("failed to read alternative feed body: %w", err)
-				}
-				break
-			}
-		}
-	}
-
-	// Rest of the XML parsing logic remains the same as in previous examples
 	processedData := preprocessXML(data)
 
-	// Detect feed type and parse
 	var root struct {
 		XMLName xml.Name
 	}
@@ -172,7 +129,6 @@ func urlToRSS(url string) (RSS, error) {
 		return RSS{}, fmt.Errorf("failed to parse XML: %w", err)
 	}
 
-	// Parsing logic as before...
 	switch strings.ToLower(root.XMLName.Local) {
 	case "rss":
 		var rssFeed RSS
@@ -197,19 +153,9 @@ func urlToRSS(url string) (RSS, error) {
 	}
 }
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-// Preprocessing function (similar to previous example)
 func preprocessXML(data []byte) []byte {
-	// Trim whitespace
-	data = bytes.TrimSpace(data)
 
-	// Remove comments
+	data = bytes.TrimSpace(data)
 	data = regexp.MustCompile(`<!--.*?-->`).ReplaceAll(data, []byte{})
 
 	// Replace problematic character entities

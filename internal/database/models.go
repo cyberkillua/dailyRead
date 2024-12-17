@@ -19,6 +19,7 @@ type Post struct {
 	Description sql.NullString
 	Url         string
 	PublishedAt sql.NullTime
+	Postname    sql.NullString
 }
 
 type Webpage struct {

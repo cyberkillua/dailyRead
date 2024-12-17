@@ -63,6 +63,11 @@ func scrapeFeed(db *database.Queries, wg *sync.WaitGroup, page database.Webpage)
 			description = sql.NullString{String: item.Description, Valid: true}
 		}
 
+		pageName := sql.NullString{}
+		if page.Name != "" {
+			pageName = sql.NullString{String: item.Title, Valid: true}
+		}
+
 		publishedAt := sql.NullTime{}
 		if item.PubDate != "" {
 			t, err := parseDate(item.PubDate)
@@ -88,6 +93,7 @@ func scrapeFeed(db *database.Queries, wg *sync.WaitGroup, page database.Webpage)
 			Description: description,
 			Url:         item.Link,
 			PublishedAt: publishedAt,
+			Postname:    pageName,
 		})
 		if err != nil {
 			if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {

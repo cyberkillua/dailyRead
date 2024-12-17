@@ -1,6 +1,6 @@
 -- name: CreatePost :one
-INSERT INTO posts (id, created_at, updated_at, title, description, url, published_at)
-VALUES ($1, $2, $3, $4, $5, $6, $7)
+INSERT INTO posts (id, created_at, updated_at, title, description, url, published_at, postName)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 RETURNING *;
 
 
