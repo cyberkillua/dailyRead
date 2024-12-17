@@ -47,6 +47,7 @@ func scrapeFeed(db *database.Queries, wg *sync.WaitGroup, page database.Webpage)
 	rss, err := urlToRSS(page.Url)
 	if err != nil {
 		log.Printf("Error scrapping feed: %v", err)
+		log.Printf("This is the problematic: %v", page.Url)
 		return
 	}
 
@@ -90,7 +91,7 @@ func scrapeFeed(db *database.Queries, wg *sync.WaitGroup, page database.Webpage)
 		})
 		if err != nil {
 			if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
-				log.Printf("Post %v already exists", post.Url)
+				// log.Printf("Post %v already exists", post.Url)
 				continue
 			}
 			log.Printf("Error creating post: %v", err)
