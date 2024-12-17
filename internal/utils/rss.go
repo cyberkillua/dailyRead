@@ -130,7 +130,7 @@ func urlToRSS(url string) (RSS, error) {
 	}
 
 	// Debug: log first 500 characters
-	log.Printf("Response Body (first 500 chars): %s", string(data[:min(len(data), 500)]))
+	// log.Printf("Response Body (first 500 chars): %s", string(data[:min(len(data), 500)]))
 
 	// Alternative feed URLs to try
 	alternativeFeedUrls := []string{
