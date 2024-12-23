@@ -1,6 +1,6 @@
 module github.com/cyberkillua/dailyread
 
-go 1.23.3
+go 1.21
 
 require (
 	github.com/go-chi/chi v1.5.5
