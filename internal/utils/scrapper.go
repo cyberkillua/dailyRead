@@ -79,6 +79,12 @@ func scrapeFeed(db *database.Queries, wg *sync.WaitGroup, page database.Webpage)
 
 			// Successfully parsed pubDate
 			publishedAt = sql.NullTime{Time: t, Valid: true}
+
+			twoMonthsAgo := time.Now().UTC().AddDate(0, -2, 0)
+			if t.Before(twoMonthsAgo) {
+				log.Printf("Skipping item %v because it's older than two months", item.Title)
+				continue
+			}
 		}
 
 		if item.Link == "" {
