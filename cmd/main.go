@@ -36,7 +36,7 @@ func main() {
 	// Initialize database queries
 	db := database.New(connection)
 
-	go utils.StartScrapping(db, 10, time.Minute)
+	go utils.StartScrapping(db, 10, 12*time.Hour)
 
 	// Create and start server
 	srv := server.New(cfg, db)
