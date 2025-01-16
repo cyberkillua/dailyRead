@@ -56,7 +56,10 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, e
 }
 
 const getPosts = `-- name: GetPosts :many
-SELECT id, created_at, updated_at, title, description, url, published_at, postname FROM posts
+SELECT id, created_at, updated_at, title, description, url, published_at, postname 
+FROM posts 
+ORDER BY created_at DESC 
+LIMIT 30
 `
 
 func (q *Queries) GetPosts(ctx context.Context) ([]Post, error) {

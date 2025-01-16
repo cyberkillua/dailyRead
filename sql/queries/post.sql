@@ -5,4 +5,7 @@ RETURNING *;
 
 
 -- name: GetPosts :many
-SELECT * FROM posts;
+SELECT id, created_at, updated_at, title, description, url, published_at, postname 
+FROM posts 
+ORDER BY created_at DESC 
+LIMIT 30;
